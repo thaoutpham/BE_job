@@ -46,6 +46,9 @@ public class UserController {
         if(!userOptional.isPresent()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        user.setEmail(userOptional.get().getEmail());
+        user.setPassword(userOptional.get().getPassword());
+        user.setType(userOptional.get().getType());
         if(user.getName().trim().equals("")){
             user.setName(userOptional.get().getName());
         }

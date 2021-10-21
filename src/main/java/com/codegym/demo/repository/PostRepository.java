@@ -9,9 +9,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
     Iterable<Post> findByAddressContaining( String address);
-    @Query(value = "select * from post order by id desc limit 10", nativeQuery = true)
+    @Query(value = "select * from post order by id desc limit 6", nativeQuery = true)
     Iterable<Post> findTop2New();
-    Iterable<Post> findAllByAddressAndDescription(String address, String description);
+    @Query(value = "select * from post order by salary desc limit 6", nativeQuery = true)
+    Iterable<Post> findTopSalary();
+    Iterable<Post> findAllByTitleContaining(String title);
     @Query(nativeQuery = true, value = "SELECT * " +
             "FROM post WHERE (:title IS NULL OR title LIKE %:title%)" +
             "  AND (:salary IS NULL OR salary >= :salary)" +
@@ -21,4 +23,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
                                   @Param("salary") double salary,
                                   @Param("exp") String exp,
                                   @Param("address") String address);
+    Iterable<Post> findAllByCompany_Id(Long id);
 }

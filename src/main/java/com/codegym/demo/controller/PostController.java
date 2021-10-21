@@ -22,8 +22,6 @@ public class PostController {
     private IPostService iPostService;
     @Autowired
     private ICompanyService iCompanyService;
-    @Autowired
-    private ICategoryService iCategoryService;
     @GetMapping
     public ResponseEntity<Iterable<Post>> findAll() {
         List<Post> posts = (List<Post>) iPostService.findAll();
@@ -72,11 +70,43 @@ public class PostController {
         return new ResponseEntity<>(productOptional.get(), HttpStatus.NO_CONTENT);
     }
     @GetMapping("/search")
-    public ResponseEntity<Iterable<Post>> findAllByAddressAndDescription( String address,  String description){
-        List<Post> postList= (List<Post>) iPostService.findAllByAddressAndDescription(address, description);
+    public ResponseEntity<Iterable<Post>> findAllByTitle( String title){
+        List<Post> postList= (List<Post>) iPostService.findAllByTitleContaining(title);
         if(postList.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(postList, HttpStatus.OK);
+    }
+    @GetMapping("/search/advance")
+    public ResponseEntity<Iterable<Post>> searchAdvance( String title, double salary, String exp, String address){
+        List<Post> postList= (List<Post>) iPostService.searchAdvance(title, salary, exp, address);
+        if(postList.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(postList, HttpStatus.OK);
+    }
+    @GetMapping("/topNew")
+    public ResponseEntity<Iterable<Post>> findTopNew() {
+        List<Post> postIterable = (List<Post>) iPostService.findTop2New();
+        if (postIterable.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(postIterable, HttpStatus.OK);
+    }
+    @GetMapping("/topSalary")
+    public ResponseEntity<Iterable<Post>> findTopSalary() {
+        List<Post> postIterable = (List<Post>) iPostService.findTopSalary();
+        if (postIterable.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(postIterable, HttpStatus.OK);
+    }
+    @GetMapping("/companies/{id}")
+    public ResponseEntity<Iterable<Post>> findAllByCompany_id(@PathVariable Long id) {
+        List<Post> postIterable = (List<Post>) iPostService.findAllByCompany_Id(id);
+        if (postIterable.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(postIterable, HttpStatus.OK);
     }
 }

@@ -1,6 +1,7 @@
 package com.codegym.demo.service.company;
 
 import com.codegym.demo.model.Company;
+import com.codegym.demo.model.Post;
 import com.codegym.demo.model.User;
 import com.codegym.demo.service.IGeneralService;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -13,5 +14,6 @@ public interface ICompanyService extends IGeneralService<Company>, UserDetailsSe
     Boolean existsByEmail(String email); //email da co trong DB chua?
 
     Boolean existsByCompanyName(String companyName); // ten cong ty da co trong DB chua
-
+    Iterable<Company> findTopNew();
+    Iterable<Company> findTopNumberOfStaff();
 }

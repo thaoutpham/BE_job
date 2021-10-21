@@ -1,6 +1,7 @@
 package com.codegym.demo.service.company;
 
 import com.codegym.demo.model.Company;
+import com.codegym.demo.model.Post;
 import com.codegym.demo.repository.CompanyRepository;
 import com.codegym.demo.security.principal.CompanyPrinciple;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,16 @@ public class CompanyService implements ICompanyService {
     @Override
     public Boolean existsByCompanyName(String companyName) {
         return companyRepository.existsByCompanyName(companyName);
+    }
+
+    @Override
+    public Iterable<Company> findTopNew() {
+        return companyRepository.findTopNew();
+    }
+
+    @Override
+    public Iterable<Company> findTopNumberOfStaff() {
+        return companyRepository.findTopNumberOfStaff() ;
     }
 
     @Override

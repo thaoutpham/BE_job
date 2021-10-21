@@ -1,10 +1,7 @@
 package com.codegym.demo.controller;
 
 import com.codegym.demo.constant.Constant;
-import com.codegym.demo.dto.request.CompanyLoginForm;
-import com.codegym.demo.dto.request.CompanyRegisterForm;
-import com.codegym.demo.dto.request.UserLoginForm;
-import com.codegym.demo.dto.request.UserRegisterForm;
+import com.codegym.demo.dto.request.*;
 import com.codegym.demo.dto.response.JwtResponse;
 import com.codegym.demo.dto.response.Response;
 import com.codegym.demo.model.Company;
@@ -29,6 +26,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.codegym.demo.dto.response.ResponseBody;
 
+import javax.validation.Valid;
+import java.util.Optional;
+
 @RequestMapping("/auth")
 @RestController
 @CrossOrigin(origins = "*")
@@ -47,6 +47,7 @@ public class AuthController {
 
     @Autowired
     private CompanyJwtService companyJwtService;
+
 
     @Autowired
     PasswordEncoder passwordEncoder;
@@ -67,8 +68,7 @@ public class AuthController {
             return new ResponseEntity<>(new ResponseBody(Response.SYSTEM_ERROR, null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    @PostMapping("/users/login")
+        @PostMapping("/users/login")
     public ResponseEntity<ResponseBody> login(@Validated @RequestBody UserLoginForm loginForm) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginForm.getEmail(), loginForm.getPassword()));
@@ -83,7 +83,6 @@ public class AuthController {
             return new ResponseEntity<>(new ResponseBody(Response.OBJECT_NOT_FOUND, null), HttpStatus.FORBIDDEN);
         }
     }
-
     @PostMapping("/companies/register")
     public ResponseEntity<ResponseBody> registerMerchant(@Validated @RequestBody CompanyRegisterForm registerForm, BindingResult bindingResult) {
         try {
@@ -128,5 +127,51 @@ public class AuthController {
         } catch (BadCredentialsException e) {
             return new ResponseEntity<>(new ResponseBody(Response.OBJECT_NOT_FOUND, null), HttpStatus.FORBIDDEN);
         }
+    }
+    @PostMapping("/companies/{id}/change-password")
+    public ResponseEntity<?> changeCompanyPassword(@Valid @RequestBody CompanyPasswordForm companyPasswordForm, @PathVariable Long id, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()) {
+            return new ResponseEntity<>(new ResponseBody(Response.OBJECT_INVALID, null), HttpStatus.BAD_REQUEST);
+        }
+        Optional<Company> company = companyService.findById(id);
+        if (!company.isPresent()) {
+            return new ResponseEntity<>(new ResponseBody(Response.SYSTEM_ERROR, null), HttpStatus.NOT_FOUND);
+        }
+        if (companyPasswordForm.getNewPassword().trim().equals(companyPasswordForm.getCurrentPassword().trim())) {
+            return new ResponseEntity<>(new ResponseBody(Response.NEW_PASSWORD_IS_DUPLICATED, null), HttpStatus.CONFLICT);
+        }
+        boolean matches = passwordEncoder.matches(companyPasswordForm.getCurrentPassword(), company.get().getPassword());
+        if (companyPasswordForm.getNewPassword() != null) {
+            if (matches) {
+                company.get().setPassword(passwordEncoder.encode(companyPasswordForm.getNewPassword().trim()));
+                companyService.save(company.get());
+            } else {
+                return new ResponseEntity<>(new ResponseBody(Response.PASSWORD_IS_NOT_TRUE, null), HttpStatus.CONFLICT);
+            }
+        }
+        return new ResponseEntity<>(new ResponseBody(Response.SUCCESS, company.get()), HttpStatus.OK);
+    }
+    @PostMapping("/users/{id}/change-password")
+    public ResponseEntity<?> changeUserPassword(@Valid @RequestBody UserPasswordForm userPasswordForm, @PathVariable Long id, BindingResult bindingResult) {
+        if (bindingResult.hasFieldErrors()) {
+            return new ResponseEntity<>(new ResponseBody(Response.OBJECT_INVALID, null), HttpStatus.BAD_REQUEST);
+        }
+        Optional<User> user = userService.findById(id);
+        if (!user.isPresent()) {
+            return new ResponseEntity<>(new ResponseBody(Response.SYSTEM_ERROR, null), HttpStatus.NOT_FOUND);
+        }
+        if (userPasswordForm.getNewPassword().trim().equals(userPasswordForm.getCurrentPassword().trim())) {
+            return new ResponseEntity<>(new ResponseBody(Response.NEW_PASSWORD_IS_DUPLICATED, null), HttpStatus.CONFLICT);
+        }
+        boolean matches = passwordEncoder.matches(userPasswordForm.getCurrentPassword(), user.get().getPassword());
+        if (userPasswordForm.getNewPassword() != null) {
+            if (matches) {
+                user.get().setPassword(passwordEncoder.encode(userPasswordForm.getNewPassword().trim()));
+                userService.save(user.get());
+            } else {
+                return new ResponseEntity<>(new ResponseBody(Response.PASSWORD_IS_NOT_TRUE, null), HttpStatus.CONFLICT);
+            }
+        }
+        return new ResponseEntity<>(new ResponseBody(Response.SUCCESS, user.get()), HttpStatus.OK);
     }
 }

@@ -30,9 +30,10 @@ public class PostService implements IPostService{
         postRepository.deleteById(id);
     }
 
+
     @Override
-    public Iterable<Post> findByAddressContaining(String address) {
-        return postRepository.findByAddressContaining(address);
+    public Iterable<Post> searchAdvance(String title, double salary, String exp, String address) {
+        return postRepository.searchAdvanced(title,salary, exp, address);
     }
 
 
@@ -42,8 +43,19 @@ public class PostService implements IPostService{
     }
 
     @Override
-    public Iterable<Post> findAllByAddressAndDescription(String address, String description) {
-        return postRepository.findAllByAddressAndDescription(address,description);
+    public Iterable<Post> findAllByTitleContaining(String title) {
+        return postRepository.findAllByTitleContaining(title);
+    }
+
+
+    @Override
+    public Iterable<Post> findAllByCompany_Id(Long id) {
+        return postRepository.findAllByCompany_Id(id);
+    }
+
+    @Override
+    public Iterable<Post> findTopSalary() {
+        return postRepository.findTopSalary();
     }
 
 }
